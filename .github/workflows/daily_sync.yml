@@ -2,10 +2,9 @@ name: Daily Rate Automation
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs at 00:00 UTC every day
-  workflow_dispatch: # Allows you to run it manually via the "Actions" tab
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
-# Crucial: This gives the bot permission to write files back to your repo
 permissions:
   contents: write
 
@@ -19,14 +18,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10' # Updated to a more modern version
+          python-version: '3.10'
 
-      - name: Install Gemini Library
-        run: pip install google-generativeai
+      - name: Install New Gemini SDK
+        # Note the change: it's now google-genai
+        run: pip install google-genai
 
       - name: Run Update Script
         env:
-          # This pulls your key from Settings > Secrets > Actions
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python update_rate.py
 
@@ -34,11 +33,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "InfohyperBot"
-          
-          # Stage both potential files
-          git add data/rubux-rate.json data/error.txt || echo "No files to add"
-          
-          # Commit only if there are changes; if no changes, exit quietly
-          git commit -m "Auto-update Robux rates: $(date +'%Y-%m-%d')" || exit 0
-          
+          git add data/rubux-rate.json data/error.txt || echo "No files"
+          git commit -m "Auto-update: $(date +'%Y-%m-%d')" || exit 0
           git push
