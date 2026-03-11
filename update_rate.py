@@ -18,7 +18,7 @@ def get_live_rates():
         text = response.text.replace("```json", "").replace("```", "").strip()
         return json.loads(text)
     except:
-        return {"devex": 0.0038, "retail": 0.0125} # Solid backup
+        return {"devex": 0.00, "retail": 0.00} # Solid backup
 
 # 1. Get rates from AI
 rates = get_live_rates()
