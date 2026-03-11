@@ -14,14 +14,15 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures full history for pushing
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install New Gemini SDK
-        # Note the change: it's now google-genai
+      - name: Install SDK
         run: pip install google-genai
 
       - name: Run Update Script
@@ -33,6 +34,14 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "InfohyperBot"
-          git add data/rubux-rate.json data/error.txt || echo "No files"
-          git commit -m "Auto-update: $(date +'%Y-%m-%d')" || exit 0
-          git push
+          
+          # Force git to see the data folder
+          git add data/rubux-rate.json data/error.txt || true
+          
+          # Check if there are actually changes to commit
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes detected in rates. Skipping commit."
+          else
+            git commit -m "Auto-update: $(date +'%Y-%m-%d %H:%M')"
+            git push origin main
+          fi
